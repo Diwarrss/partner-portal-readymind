@@ -1,58 +1,79 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ReadyMind Partner Portal
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación web para **ReadyMind**: landing pública, **panel de administración** (tenants, clientes, contacto, licencias, integración **Microsoft Partner Center**) y **portal de clientes** (licencias, solicitudes de productos). Incluye **API** con tokens (Sanctum) para clientes.
 
-## About Laravel
+| Área | Ruta | Notas |
+|------|------|--------|
+| Pública | `/` | Landing |
+| Login | `/login` | Admin (`users`) o cliente (`customers` + código de **centro/tenant**) |
+| Admin | `/admin` | Tenants, clientes, contacto, exportación, perfil |
+| Clientes | `/portal/*` | Tras login de cliente |
+| API | Ver `docs/partner-center-api.md` | v1: tokens, suscripciones, contacto |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Documentación detallada (estado del proyecto, stack, pasos largos): **[`docs/RESUMEN-PROYECTO.md`](docs/RESUMEN-PROYECTO.md)**.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requisitos
 
-## Learning Laravel
+- **PHP** ≥ 8.3 (extensiones típicas de Laravel)
+- **Composer** 2.x
+- **Node.js** — recomendado: versión en [`.nvmrc`](.nvmrc) (`nvm use`); suele funcionar Node 20 LTS
+- **MySQL** (u otro motor compatible configurado en `.env`)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Puesta en marcha
 
 ```bash
-composer require laravel/boost --dev
+cp .env.example .env
+composer install
+php artisan key:generate
+# Editar .env: APP_URL, DB_*, MAIL_*, etc.
 
-php artisan boost:install
+php artisan migrate
+php artisan db:seed   # opcional: datos de demo
+
+npm install
+npm run build         # producción / primera vez
+php artisan serve     # http://127.0.0.1:8000
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+**Desarrollo frontend en caliente:** en otra terminal, `npm run dev` y usa el mismo `APP_URL` que indique Vite/Laravel.
 
-## Contributing
+**Colas / correo (opcional):** `php artisan queue:work`. Con `MAIL_MAILER=log` los envíos van al log.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## Cuentas de demo (tras `db:seed`)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Rol | Email | Contraseña | Notas |
+|-----|--------|------------|--------|
+| Admin | `admin@readymind.ms` | `password` | → `/admin` |
+| Cliente | `cliente@readymind.ms` o `dialvaro@readymind.ms` | `password` | Indicar centro **MX** (u otro tenant sembrado) → `/portal` |
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Stack (resumen)
 
-## License
+- **Backend:** Laravel 12, Inertia, Spatie Permission, Sanctum, Ziggy  
+- **Frontend:** Vue 3, Vite, Tailwind, reka-ui / radix-vue  
+- **Datos:** Eloquent, migraciones y seeders en `database/`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Servicios relevantes: `app/Services/` (p. ej. Partner Center, licencias).
+
+---
+
+## Más documentación
+
+| Documento | Contenido |
+|-----------|-----------|
+| [`docs/RESUMEN-PROYECTO.md`](docs/RESUMEN-PROYECTO.md) | Resumen amplio, estructura del repo, guía paso a paso |
+| [`docs/partner-center-api.md`](docs/partner-center-api.md) | Contrato API v1 |
+| [`docs/microsoft-partner-center-testing.md`](docs/microsoft-partner-center-testing.md) | Pruebas y credenciales Microsoft / sandbox |
+
+---
+
+## Licencia
+
+MIT (framework Laravel y convención del proyecto).
